@@ -21,10 +21,10 @@ int main() {
 
     // Paths to .npy files
     std::vector<std::string> filePaths = {
-        "/home/hp/make_csv/n01440764.npy",
-        "/home/hp/make_csv/n01443537.npy",
-        "/home/hp/make_csv/n01484850.npy",
-        "/home/hp/make_csv/n01491361.npy"
+        "/home/hp/DLSH/Data/n01440764.npy",
+        "/home/hp/DLSH/Data/n01443537.npy",
+        "/home/hp/DLSH/Data/n01484850.npy",
+        "/home/hp/DLSH/Data/01491361.npy"
     };
 
     //container for all fingerprints that we will transform into the csv file
@@ -56,7 +56,7 @@ int main() {
     shuffleFingerprints(allFingerprints);
 
     // Write to a CSV file
-    std::ofstream outFile("fingerprints_class.csv");
+    std::ofstream outFile("/home/hp/DLSH/Data/fingerprints_class.csv");
     for (const auto& fp : allFingerprints) {
         outFile << fp.classLabel << ",";
         for (size_t i = 0; i < fp.data.size(); ++i) {
