@@ -2,6 +2,8 @@
 #define HASHING_H
 
 #include <vector>
+#include <map>
+#include <set>
 
 struct HashingFunct {
     /*Chaque fonction de hachage est definie par 3 paramètres :
@@ -16,16 +18,27 @@ struct HashingFunct {
     double w;
 };
 
+template <typename T>
+struct VectorComparator {
+    bool operator()(const std::vector<T>& v1, const std::vector<T>& v2) const ;
+};
+
+template <typename T>
+void printVector(const std::vector<T>& vec);
+
+void printDictionary(const std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> >& dict) ;
+
 HashingFunct generateLSHParameters(int n, double w = 1);
 
 double hashingComputing(std::vector<double> point, HashingFunct h);
 
-std::vector<std::vector<int>> finalHash(
-    std::vector<std::vector<double>>& points,
-    std::vector<HashingFunct>& hashfunctions,
-    int& L,
-    int& n
-);
+
+std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> > finalHash(
+            std::vector<std::vector<double>>& points,
+            std::vector<HashingFunct>& hashfunctions,
+            int& L,
+            int& n
+    );
 
 
 

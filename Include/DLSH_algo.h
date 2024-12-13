@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "/home/hp/DLSH/Include/hashing.h"
+#include "/home/ensimag/3A/DLSH/Include/hashing.h"
 
 // Classe pour implémenter l'algorithme DLSH
 class DLSH {
@@ -20,7 +20,7 @@ public:
     DLSH(const std::string& csvFilePath, int L, int n, int w);
 
     // Méthode pour exécuter l'algorithme DLSH au niveau 1
-    std::vector<std::vector<int>> computeHashTable_niv1();
+    std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> > computeHashTable_niv1();
 
     // Méthode pour exécuter l'algorithme DLSH au niveau 2
     std::vector<std::vector<int>> computeHashTable_niv2(std::vector<std::vector<int>>& hashTable_niv1);

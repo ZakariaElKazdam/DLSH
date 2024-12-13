@@ -1,4 +1,4 @@
-#include "/home/hp/DLSH/Include/DLSH_algo.h"
+#include "/home/ensimag/3A/DLSH/Include/DLSH_algo.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -6,7 +6,7 @@
 
 // Constructeur
 DLSH::DLSH(const std::string& csvFilePath, int L, int n, int w)
-    : csvFilePath(csvFilePath), L(L), n(n), w(w), hashFunctions(L) {
+    : csvFilePath(csvFilePath), L(L), n(n), w(w) {
     for (int i = 0; i < L; ++i) {
         hashFunctions.push_back(generateLSHParameters(n, w));
     }
@@ -16,7 +16,7 @@ DLSH::DLSH(const std::string& csvFilePath, int L, int n, int w)
 void DLSH::loadDataFromCSV() {
     std::ifstream file(csvFilePath);
     if (!file.is_open()) {
-        throw std::runtime_error("Erreur : impossible d'ouvrir le fichier CSV");
+        throw std::runtime_error("Erreur1 : impossible d'ouvrir le fichier CSV");
     }
 
     std::string line;
@@ -42,7 +42,7 @@ void DLSH::loadDataFromCSV() {
 
 
 // Méthode pour exécuter l'algorithme DLSH
-std::vector<std::vector<int>> DLSH::computeHashTable_niv1() {
+std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> > DLSH::computeHashTable_niv1() {
     if (dataPoints.empty()) {
         throw std::runtime_error("Erreur : les données sont vides. Chargez les données depuis le fichier CSV.");
     }
@@ -55,7 +55,7 @@ std::vector<std::vector<int>> DLSH::computeHashTable_niv1() {
 int main() {
     try {
         // Chemin vers le fichier CSV généré
-        std::string csvFilePath = "/home/hp/DLSH/Data/fingerprints_class.csv";
+        std::string csvFilePath = "/home/ensimag/3A/DLSH/Data/fingerprints_class.csv";
 
         // Paramètres pour l'algorithme DLSH
         int L = 3;  // Nombre de fcts de hachage
@@ -80,7 +80,7 @@ int main() {
             --n; // Exclure la première colonne (le label)
         }
         file.close();
-        int w = 1;  // Largeur des bins
+        int w = 3;  // Largeur des bins
 
         // Initialiser l'algorithme DLSH
         DLSH dlsh(csvFilePath, L, n, w);
@@ -89,17 +89,11 @@ int main() {
         dlsh.loadDataFromCSV();
 
         // Calculer les tables de hachage niveau 1
-        std::vector<std::vector<int>> hashTable_niv1 = dlsh.computeHashTable_niv1();
+        std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> > hashTable_niv1 = dlsh.computeHashTable_niv1();
 
         // Afficher les résultats
         std::cout << "Résultats de la table de hachage (niveau 1) :\n";
-        for (size_t i = 0; i < hashTable_niv1.size(); ++i) {
-            std::cout << "Point " << i << ": ";
-            for (size_t j = 0; j < hashTable_niv1[i].size(); ++j) {
-                std::cout << hashTable_niv1[i][j] << " ";
-            }
-            std::cout << "\n";
-        }
+        printDictionary(hashTable_niv1);
 
     } catch (const std::exception& e) {
         std::cerr << "Erreur : " << e.what() << std::endl;

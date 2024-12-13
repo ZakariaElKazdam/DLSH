@@ -1,3 +1,0 @@
-/home/hp/DLSH/build/CMakeFiles/dlsh_algo.dir
-/home/hp/DLSH/build/CMakeFiles/edit_cache.dir
-/home/hp/DLSH/build/CMakeFiles/rebuild_cache.dir
