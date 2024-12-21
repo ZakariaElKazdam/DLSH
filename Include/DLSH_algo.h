@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "/home/ensimag/3A/DLSH/Include/hashing.h"
+#include "../Include/hashing.h"
 
 // Classe pour implémenter l'algorithme DLSH
 class DLSH {

@@ -1,4 +1,4 @@
-#include "/home/ensimag/3A/DLSH/Include/DLSH_algo.h"
+#include "../Include/DLSH_algo.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -89,7 +89,7 @@ std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double
 int main() {
     try {
         // Chemin vers le fichier CSV généré
-        std::string csvFilePath = "/home/ensimag/3A/DLSH/Data/fingerprints_class.csv";
+        std::string csvFilePath = "../Data/fingerprints_class.csv";
 
         // Paramètres pour l'algorithme DLSH
         int L1 = 3;  // Nombre de fcts de hachage niveau 1
