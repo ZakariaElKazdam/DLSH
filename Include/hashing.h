@@ -26,18 +26,19 @@ struct VectorComparator {
 template <typename T>
 void printVector(const std::vector<T>& vec);
 
-void printDictionary(const std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> >& dict) ;
+void printDictionary(const std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> >& dict) ;
 
 HashingFunct generateLSHParameters(int n, double w = 1);
 
-double hashingComputing(std::vector<double> point, HashingFunct h);
+int hashingComputing(std::vector<double> point, HashingFunct h);
 
 
-std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> > finalHash(
-            std::vector<std::vector<double>>& points,
-            std::vector<HashingFunct>& hashfunctions,
-            int& L,
-            int& n
+std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> >  finalHash(
+        std::vector< std::vector<double>> & points ,
+        std::vector<HashingFunct>& hashfunctions1 ,
+        std::vector<HashingFunct>& hashfunctions2 ,
+        int& L1 ,
+        int& L2
     );
 
 

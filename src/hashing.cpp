@@ -23,17 +23,22 @@ void printVector(const std::vector<T>& vec) {
     std::cout << "] ";
 }
 
-void printDictionary(const std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> >& dict) {
+void printDictionary(const std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> >& dict) {
     /*fonction qui print un dictionnaire de manière clé valeur */
-    for (const auto& [key, valueSet] : dict) {
-        std::cout << "Clé : ";
+    for (const auto& [key, valueDict] : dict) {
+        std::cout << "Clé niv 1 : ";
         printVector<int>(key);
-        std::cout << "\nValeurs : "<< valueSet.size() <<"\n";
+        std::cout << "\nValeur : \n";
 
-        for (const auto& value : valueSet) {
-            std::cout << "  ";
-            printVector<double>(value); // Afficher chaque valeur (std::vector<double>)
-            std::cout << "\n";
+        for (const auto& [key2 , valueSet] : valueDict) {
+            std::cout << "-----> Sous dict  : ";
+            printVector<int>(key2);
+            std::cout << "\n les points sont  : \n";
+
+            for (const auto & point : valueSet){
+                printVector(point);
+                std::cout << "\n";
+            }
         }
         std::cout << "--------------------\n";
     }
@@ -76,7 +81,7 @@ HashingFunct generateLSHParameters(int n, double w = 1) {
     return {a, b, w};
 }
 
-double hashingComputing ( std::vector<double> point , HashingFunct h) {
+int hashingComputing ( std::vector<double> point , HashingFunct h) {
     /*Cett fonction donne la valeur de la projection d'un point en utilisant un fonction de hachage
 
     Params : point  vecteur qui represente la fingerprint d'une donnée
@@ -91,7 +96,13 @@ double hashingComputing ( std::vector<double> point , HashingFunct h) {
     return static_cast<int>(result);
 }
 
-std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> >  finalHash (std::vector< std::vector<double>> & points ,std::vector<HashingFunct>& hashfunctions , int& L , int& n ){
+std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> >   finalHash (
+        std::vector< std::vector<double>> & points ,
+        std::vector<HashingFunct>& hashfunctions1 ,
+        std::vector<HashingFunct>& hashfunctions2 ,
+        int& L1 ,
+        int& L2)
+        {
     /* Calcule le vecteur final qui concatene les resultats des fonction de hachage
 
     Params : points  c'est un vecteur de  points  (embeddings des images, videos , texte ...  concernée)
@@ -102,36 +113,22 @@ std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double
     Return hachage final de tous les points
     */
 
-    std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> > result;
+    std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> > result;
 
+    size_t num_points = points.size();
+    for(int i =0 ; i<num_points ; i++){
+        std::vector<int> hash1(L1);
+        std::vector<int> hash2(L2);
 
-    for(int i =0 ; i<n ; i++){
-        std::vector<int> cle(L);
-
-        for( int j =0 ; j<L ; j++){
-            cle[j]= hashingComputing (points[i] , hashfunctions[j] );
+        for( int j =0 ; j<L1 ; j++){
+            hash1[j]= hashingComputing (points[i] , hashfunctions1[j] );
+        }
+        for( int j =0 ; j<L2 ; j++){
+            hash2[j]= hashingComputing (points[i] , hashfunctions2[j] );
         }
 
-        result[cle].insert(points[i]);
+
+        result[hash1][hash2].insert(points[i]);
     }
     return result;
 }
-/*
-int main(){
-    // Exemple : Générer des paramètres pour un vecteur de dimension 5
-    int L = 4;
-    int n = 2;
-    std::vector<HashingFunct> hashfunctions(L);
-    for(int i = 0 ; i<L ; i++){
-        hashfunctions[i] = generateLSHParameters(n);
-    }
-
-    std::vector< std::vector<double> > x = { {1.485, -1} , {1.7, -1.1}};
-
-
-    std::map<std::vector<int>, std::set<std::vector<double>, VectorComparator<double> >, VectorComparator<int> > resultat = finalHash (x , hashfunctions , L ,n);
-    std::cout<<"les valeurs ddu hashage final sont:\n";
-    printDictionary(resultat);
-
-    return 0;
-} */
