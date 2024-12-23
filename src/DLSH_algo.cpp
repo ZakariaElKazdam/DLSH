@@ -2,7 +2,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <unordered_map>
+#include <chrono>
+#include <malloc.h>
 
 // Constructeur
 DLSH::DLSH(  std::string& csvFilePath, int L1, int L2,  int n, double w1, double w2)
@@ -14,6 +15,9 @@ DLSH::DLSH(  std::string& csvFilePath, int L1, int L2,  int n, double w1, double
         hashFunctions2.push_back(generateLSHParameters(n, w2));
     }
 }
+
+
+
 
 // Méthode pour charger les données depuis un fichier CSV
 void DLSH::loadDataFromCSV() {
@@ -51,6 +55,15 @@ std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<doubl
     }
 
     return finalHash(dataPoints, hashFunctions1, hashFunctions2, L1, L2);
+}
+
+std::set<std::vector<double> , VectorComparator<double> > newPoint(std::vector<double> point) {
+
+}
+
+size_t getCurrentMemoryUsage() {
+    struct mallinfo mi = mallinfo();
+    return mi.uordblks; // Mémoire occupée en octets
 }
 
 
@@ -91,13 +104,26 @@ int main() {
 
         // Charger les données depuis le fichier CSV
         dlsh.loadDataFromCSV();
+        // Mesurer le temps de calcul de la table de hachage
+        auto start = std::chrono::high_resolution_clock::now();
+
+        size_t memoryBefore = getCurrentMemoryUsage();
 
         // Calculer les tables de hachage niveau 1
         std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> > hashTable = dlsh.computeHashTable();
 
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+
+        size_t memoryAfter = getCurrentMemoryUsage();
+        size_t memoryUsed = memoryAfter - memoryBefore;
+
         // Afficher les résultats
         std::cout << "Résultats de la table de hachage (niveau 1) :\n";
         printDictionary(hashTable);
+
+        std::cout << "Temps d'exécution : " << elapsed.count() << " secondes\n";
+        std::cout << "Mémoire utilisée par l'algorithme : " << memoryUsed / 1024.0 << " Ko\n";
 
 
     } catch (const std::exception& e) {

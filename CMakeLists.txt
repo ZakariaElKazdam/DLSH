@@ -12,6 +12,7 @@ include_directories(${CMAKE_SOURCE_DIR}/cnpy)
 set(SOURCE_FILES
         src/DLSH_algo.cpp
         src/hashing.cpp
+        src/NewPoint.cpp
 )
 
 # Ajoute un exécutable

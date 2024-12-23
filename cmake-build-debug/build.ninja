@@ -63,6 +63,13 @@ build CMakeFiles/dlsh_algo.dir/src/hashing.cpp.o: CXX_COMPILER__dlsh_algo_unscan
   OBJECT_DIR = CMakeFiles/dlsh_algo.dir
   OBJECT_FILE_DIR = CMakeFiles/dlsh_algo.dir/src
 
+build CMakeFiles/dlsh_algo.dir/src/NewPoint.cpp.o: CXX_COMPILER__dlsh_algo_unscanned_Debug /home/hp/DLSH/src/NewPoint.cpp || cmake_object_order_depends_target_dlsh_algo
+  DEP_FILE = CMakeFiles/dlsh_algo.dir/src/NewPoint.cpp.o.d
+  FLAGS = -g -std=gnu++17 -fdiagnostics-color=always
+  INCLUDES = -I/home/hp/DLSH/Include -I/home/hp/DLSH/cnpy
+  OBJECT_DIR = CMakeFiles/dlsh_algo.dir
+  OBJECT_FILE_DIR = CMakeFiles/dlsh_algo.dir/src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target dlsh_algo
@@ -71,7 +78,7 @@ build CMakeFiles/dlsh_algo.dir/src/hashing.cpp.o: CXX_COMPILER__dlsh_algo_unscan
 #############################################
 # Link the executable dlsh_algo
 
-build dlsh_algo: CXX_EXECUTABLE_LINKER__dlsh_algo_Debug CMakeFiles/dlsh_algo.dir/src/DLSH_algo.cpp.o CMakeFiles/dlsh_algo.dir/src/hashing.cpp.o
+build dlsh_algo: CXX_EXECUTABLE_LINKER__dlsh_algo_Debug CMakeFiles/dlsh_algo.dir/src/DLSH_algo.cpp.o CMakeFiles/dlsh_algo.dir/src/hashing.cpp.o CMakeFiles/dlsh_algo.dir/src/NewPoint.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/dlsh_algo.dir
   POST_BUILD = :
