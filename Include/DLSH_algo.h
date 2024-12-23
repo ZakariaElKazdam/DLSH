@@ -21,10 +21,10 @@ public:
     dataPoints : Données des fingerprints
 
  */
-    DLSH(const std::string& csvFilePath, int L1, int L2,  int n, double w1, double w2);
+    DLSH( std::string& csvFilePath, int L1, int L2,  int n, double w1, double w2);
 
     // Méthode pour exécuter l'algorithme DLSH au niveau 1
-    std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> > computeHashTable_niv1();
+    std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<double> , VectorComparator<double> >, VectorComparator<int> >, VectorComparator<int> > computeHashTable();
 
     // Méthode pour charger les données depuis un fichier CSV
     void loadDataFromCSV();

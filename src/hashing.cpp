@@ -33,12 +33,16 @@ void printDictionary(const std::map<std::vector<int>, std::map<std::vector<int>,
         for (const auto& [key2 , valueSet] : valueDict) {
             std::cout << "-----> Sous dict  : ";
             printVector<int>(key2);
-            std::cout << "\n les points sont  : \n";
+            std::cout << "\n les points sont  : " << valueSet.size() <<"\n";
+
+            /*
 
             for (const auto & point : valueSet){
                 printVector(point);
                 std::cout << "\n";
             }
+
+             */
         }
         std::cout << "--------------------\n";
     }
@@ -106,9 +110,11 @@ std::map<std::vector<int>, std::map<std::vector<int>, std::set<std::vector<doubl
     /* Calcule le vecteur final qui concatene les resultats des fonction de hachage
 
     Params : points  c'est un vecteur de  points  (embeddings des images, videos , texte ...  concernée)
-             L  un entier qui represente le nombre de table de hachage utilisé
-             n dimensions des embeddings
-             hashfunctions vecteur des tables de hachage
+             L1  un entier qui represente le nombre de table de hachage utilisé
+             L2 un entier qui represente le nombre de table de hachage utilisé dans le second niveau
+             hashfunctions1 vecteur des tables de hachage pour le premier niveau
+             hashfunctions2 vecteur des tables de hachage pour le second niveau
+
 
     Return hachage final de tous les points
     */
