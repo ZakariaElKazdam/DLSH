@@ -18,5 +18,7 @@ set(SOURCE_FILES
 # Ajoute un exécutable
 add_executable(dlsh_algo ${SOURCE_FILES})
 
+add_executable(test_NewPoint src/NewPoint.cpp)
+
 # Lier les bibliothèques nécessaires
 # Ajoutez d'autres bibliothèques ici si nécessaires

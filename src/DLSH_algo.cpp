@@ -16,6 +16,15 @@ DLSH::DLSH(  std::string& csvFilePath, int L1, int L2,  int n, double w1, double
     }
 }
 
+// Accéder aux fonctions de hachage de niveau 1
+const std::vector<HashingFunct>& DLSH::getHashFunctions1() const {
+    return hashFunctions1;
+}
+
+// Accéder aux fonctions de hachage de niveau 2
+const std::vector<HashingFunct>& DLSH::getHashFunctions2() const {
+    return hashFunctions2;
+}
 
 
 
@@ -66,7 +75,7 @@ size_t getCurrentMemoryUsage() {
     return mi.uordblks; // Mémoire occupée en octets
 }
 
-
+/*
 int main() {
     try {
         // Chemin vers le fichier CSV généré
@@ -133,6 +142,6 @@ int main() {
 
     return 0;
 }
-
+*/
 
 

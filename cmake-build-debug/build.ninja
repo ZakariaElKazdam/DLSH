@@ -86,6 +86,38 @@ build dlsh_algo: CXX_EXECUTABLE_LINKER__dlsh_algo_Debug CMakeFiles/dlsh_algo.dir
   TARGET_FILE = dlsh_algo
   TARGET_PDB = dlsh_algo.dbg
 
+# =============================================================================
+# Object build statements for EXECUTABLE target test_NewPoint
+
+
+#############################################
+# Order-only phony target for test_NewPoint
+
+build cmake_object_order_depends_target_test_NewPoint: phony || .
+
+build CMakeFiles/test_NewPoint.dir/src/NewPoint.cpp.o: CXX_COMPILER__test_NewPoint_unscanned_Debug /home/hp/DLSH/src/NewPoint.cpp || cmake_object_order_depends_target_test_NewPoint
+  DEP_FILE = CMakeFiles/test_NewPoint.dir/src/NewPoint.cpp.o.d
+  FLAGS = -g -std=gnu++17 -fdiagnostics-color=always
+  INCLUDES = -I/home/hp/DLSH/Include -I/home/hp/DLSH/cnpy
+  OBJECT_DIR = CMakeFiles/test_NewPoint.dir
+  OBJECT_FILE_DIR = CMakeFiles/test_NewPoint.dir/src
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target test_NewPoint
+
+
+#############################################
+# Link the executable test_NewPoint
+
+build test_NewPoint: CXX_EXECUTABLE_LINKER__test_NewPoint_Debug CMakeFiles/test_NewPoint.dir/src/NewPoint.cpp.o
+  FLAGS = -g
+  OBJECT_DIR = CMakeFiles/test_NewPoint.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = test_NewPoint
+  TARGET_PDB = test_NewPoint.dbg
+
 
 #############################################
 # Utility command for edit_cache
@@ -120,7 +152,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Folder: /home/hp/DLSH/cmake-build-debug
 
-build all: phony dlsh_algo
+build all: phony dlsh_algo test_NewPoint
 
 # =============================================================================
 # Built-in targets

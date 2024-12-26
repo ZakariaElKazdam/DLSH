@@ -15,7 +15,8 @@
 					"source" : ".",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -30,7 +31,8 @@
 					"name" : "DLSH",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -41,6 +43,13 @@
 					"id" : "dlsh_algo::@6890427a1f51a3e7e1df",
 					"jsonFile" : "target-dlsh_algo-Debug-c083e20c7a29a0acaa61.json",
 					"name" : "dlsh_algo",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "test_NewPoint::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-test_NewPoint-Debug-05a959dac462aa10bba2.json",
+					"name" : "test_NewPoint",
 					"projectIndex" : 0
 				}
 			]

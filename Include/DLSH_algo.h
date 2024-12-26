@@ -29,6 +29,13 @@ public:
     // Méthode pour charger les données depuis un fichier CSV
     void loadDataFromCSV();
 
+    // Accéder aux fonctions de hachage de niveau 1
+    const std::vector<HashingFunct>& getHashFunctions1() const;
+
+    // Accéder aux fonctions de hachage de niveau 2
+    const std::vector<HashingFunct>& getHashFunctions2() const;
+
+
 private:
     std::string csvFilePath;
     int L1;
