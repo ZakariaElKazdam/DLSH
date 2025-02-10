@@ -11,7 +11,7 @@
 
 
 struct HashingFunct {
-    std::vector<double> a;
+    double* a;
     double b;
     double w;
 };
@@ -19,19 +19,24 @@ struct HashingFunct {
 //  CUDA KERNELS
 
 // CUDA Kernel to generate both normally distributed vector `a` and a uniform value `b`
-__global__ void generateLSHParams(double* d_a, double* d_b, int n, double w, unsigned long long seed) {
-    int i = threadIdx.x + blockIdx.x * blockDim.x; // Compute global thread index
+__global__ void generateLSHParams(double* d_a, double* d_b, int n, double w, unsigned long long seed, int funcIndex) {
+    int i = threadIdx.x + blockIdx.x * blockDim.x;  // Compute global thread index
     curandState state;
-    curand_init(seed, i, 0, &state); // Initialize cuRAND state
+    
+    // Initialize random seed for each function independently
+    curand_init(seed + funcIndex, i, 0, &state);  
+
+    int offset = funcIndex * n;  // Offset for storing a[i] in the correct hash function slot
 
     if (i < n) {
-        d_a[i] = curand_normal(&state); // Generate normally distributed value for a[i]
+        d_a[offset + i] = curand_normal(&state);  // Generate normally distributed value for a
     }
 
-    if (i == 0) { // Only thread 0 generates 'b'
-        *d_b = curand_uniform(&state) * w; // Scale to range [0, w]
+    if (i == 0) { // Only one thread generates `b`
+        d_b[funcIndex] = curand_uniform(&state) * w;  // Scale to range [0, w]
     }
 }
+
 
 // CUDA Kernel for element-wise multiplication and block-wise reduction
 __global__ void multiplyElements(double* d_point, double* d_a, double* d_partialSum, int n) {
@@ -71,7 +76,7 @@ __global__ void sumPartialSums(double* d_partialSum, double* d_finalSum, int num
         if (tid < stride) {
             sharedMem[tid] += sharedMem[tid + stride];
         }
-        __syncthreads();
+        __syncthread_bds();
     }
 
     if (tid == 0) {
@@ -82,15 +87,14 @@ __global__ void sumPartialSums(double* d_partialSum, double* d_finalSum, int num
 // CUDA Kernel to compute hashes in parallel
 __global__ void computeHashes(double* d_points, int* d_hash1, int* d_hash2,
                               HashingFunct* d_hashfunctions1, HashingFunct* d_hashfunctions2,
-                              int num_points, int L1, int L2, int D) {  // D est la dimension du point dans l'espace
+                              int num_points, int L1, int L2, int D) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < num_points) {
         for (int j = 0; j < L1; j++) {
-            d_hash1[i * L1 + j] = hashingComputingCUDA(d_points + i * D, d_hashfunctions1[j]);
+            d_hash1[i * L1 + j] = hashingComputingCUDA(d_points + i * D, d_hashfunctions1[j], D);
         }
-        // à chaque point on applique L1 fonction de hachage et on stock dans i * L1 + j
         for (int j = 0; j < L2; j++) {
-            d_hash2[i * L2 + j] = hashingComputingCUDA(d_points + i * D, d_hashfunctions2[j]);
+            d_hash2[i * L2 + j] = hashingComputingCUDA(d_points + i * D, d_hashfunctions2[j], D);
         }
     }
 }
@@ -99,57 +103,56 @@ __global__ void computeHashes(double* d_points, int* d_hash1, int* d_hash2,
 // 2️⃣ HOST FUNCTIONS
 
 std::vector<HashingFunct> generateLSHParamsOnGPU(int n, double w, int numFunctions) {
-    HashingFunct* d_hashFunctions;
-    cudaMalloc(&d_hashFunctions, numFunctions * sizeof(HashingFunct));
+    double *d_a, *d_b;  // Device memory for `a` and `b`
+    
+    // Allocate memory for `a` (numFunctions * n) and `b` (numFunctions)
+    cudaMalloc(&d_a, numFunctions * n * sizeof(double));
+    cudaMalloc(&d_b, numFunctions * sizeof(double));
 
     int threadsPerBlock = 256;
-    int blocksPerGrid = (numFunctions + threadsPerBlock - 1) / threadsPerBlock;
+    int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
+    
+    for (int funcIndex = 0; funcIndex < numFunctions; funcIndex++) {
+        // Launch kernel separately for each hash function
+        generateLSHParams<<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, n, w, time(NULL), funcIndex); // god i swear this idea and how i fixed the problem is magnifico 
+        cudaDeviceSynchronize();
+    }
 
-    generateLSHParams<<<blocksPerGrid, threadsPerBlock>>>(d_hashFunctions, n, w, numFunctions, time(NULL));
-    cudaDeviceSynchronize();
+    // Copy data back to host
+    std::vector<double> h_a(numFunctions * n); // contiennt a de toutes les fonctions de hachages
+    std::vector<double> h_b(numFunctions);
 
+    cudaMemcpy(h_a.data(), d_a, numFunctions * n * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_b.data(), d_b, numFunctions * sizeof(double), cudaMemcpyDeviceToHost);
+
+    // Fill the vector of HashingFunct
     std::vector<HashingFunct> hashFunctions(numFunctions);
-    cudaMemcpy(hashFunctions.data(), d_hashFunctions, numFunctions * sizeof(HashingFunct), cudaMemcpyDeviceToHost);
-    cudaFree(d_hashFunctions);
+    for (int i = 0; i < numFunctions; i++) { // à revoir si cette copie est nécessaire , ne serait il mieux de garder tous les a et les b dans deux vecteurs h_a et h_b !!!!!!!!!!!!!
+        hashFunctions[i].a = d_a + i * n;  
+        hashFunctions[i].b = h_b[i];       
+        hashFunctions[i].w = w;
+    }
+
+    // Free GPU memory
+    cudaFree(d_a);
+    cudaFree(d_b);
 
     return hashFunctions;
 }
 
+
 // Hashing computation using CUDA
 // prend en paramètre le point qui est un vecteur et une fonction de hashage et return le hashage qui est un entier (bucket )
-int hashingComputingCUDA(std::vector<double>& point, HashingFunct& h) {
-    int n = point.size();
-    double *d_point, *d_a, *d_partialSum, *d_finalSum;
-    double h_finalSum;
+__device__ int hashingComputingCUDA(const double* d_point, const HashingFunct& h, int n) {
+    double sum = 0.0;
 
-    // Allocate memory on GPU
-    cudaMalloc(&d_point, n * sizeof(double));
-    cudaMalloc(&d_a, n * sizeof(double));
-
-    int numBlocks = (n + 255) / 256; // fonction ceil(n/256)
-    cudaMalloc(&d_partialSum, numBlocks * sizeof(double));
-    cudaMalloc(&d_finalSum, sizeof(double));
-
-    // Copy data from CPU to GPU
-    cudaMemcpy(d_point, point.data(), n * sizeof(double), cudaMemcpyHostToDevice); // point.data() est bien un pointeur , point toute seul ne marche pas , un std::vector
-    cudaMemcpy(d_a, h.a.data(), n * sizeof(double), cudaMemcpyHostToDevice);
-
-    multiplyElements<<<numBlocks, 256>>>(d_point, d_a, d_partialSum, n); // hypothese sur le hardware que le max de thread par bloc est 256 ( multiple de 32 pour le wraps )
-    if (numBlocks > 1) {
-        sumPartialSums<<<1, numBlocks>>>(d_partialSum, d_finalSum, numBlocks);
-        cudaMemcpy(&h_finalSum, d_finalSum, sizeof(double), cudaMemcpyDeviceToHost);
-    } else {
-        cudaMemcpy(&h_finalSum, d_partialSum, sizeof(double), cudaMemcpyDeviceToHost);
+    // Compute dot product sequentially
+    for (int i = 0; i < n; i++) {
+        sum += d_point[i] * h.a[i];  // Each thread processes its full dot product
     }
 
-    // Free GPU memory
-    cudaFree(d_point);
-    cudaFree(d_a);
-    cudaFree(d_partialSum);
-    cudaFree(d_finalSum);
-
-    h_finalSum = (h_finalSum + h.b) / h.w;
-    return static_cast<int>(h_finalSum);
+    sum = (sum + h.b) / h.w;
+    return static_cast<int>(sum);
 }
 
 // Host function to compute the final hash table
