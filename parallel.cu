@@ -1,7 +1,3 @@
-//
-// Created by zak on 2/4/25.
-//
-
 #include <curand_kernel.h>
 #include <cuda_runtime.h>
 #include <iostream>
@@ -10,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 #include <device_launch_parameters.h>
+#include <random>
+#include <iostream>
 
 struct HashingFunct {
     double* a;
@@ -18,11 +16,7 @@ struct HashingFunct {
 };
 
 __global__ void generateLSHParams(double* d_a, double* d_b, int n, double w, unsigned long long seed, int funcIndex) {
-    /* 
     
-    
-    
-    */
     int i = threadIdx.x + blockIdx.x * blockDim.x;
 
     curandState state;
@@ -123,17 +117,60 @@ std::unordered_map<std::vector<int>, std::unordered_map<std::vector<int>, std::v
     return result;
 }
 
+
 int main() {
     std::string csvFilePath = "../Data/fingerprints_class.csv";
     int L1 = 3, L2 = 2;
     double w1 = 10.0, w2 = 5.0;
+
     std::vector<std::vector<double>> points = loadDataFromCSV(csvFilePath);
     int D = points[0].size();
+
     auto [hashFunctions1, d_a1] = generateLSHParamsOnGPU(D, w1, L1);
     auto [hashFunctions2, d_a2] = generateLSHParamsOnGPU(D, w2, L2);
+
     auto hashTable = finalHashCUDA(points, hashFunctions1, hashFunctions2, L1, L2);
+
+    // Generate a random point
+    std::vector<double> randomPoint(D);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-1, 1); // Assuming the range of input data
+
+    for (int i = 0; i < D; i++) {
+        randomPoint[i] = dis(gen);
+    }
+
+    // Compute hash values for the random point
+    std::vector<int> hash1(L1), hash2(L2);
+    for (int i = 0; i < L1; i++) hash1[i] = hashingComputingCUDA(randomPoint.data(), hashFunctions1[i], D);
+    for (int i = 0; i < L2; i++) hash2[i] = hashingComputingCUDA(randomPoint.data(), hashFunctions2[i], D);
+
+    // Print the hash values of the random point
+    std::cout << "Random Point Hash Values:\nL1: ";
+    for (int h : hash1) std::cout << h << " ";
+    std::cout << "\nL2: ";
+    for (int h : hash2) std::cout << h << " ";
+    std::cout << "\n";
+
+    // Check for neighbors in the same hash bucket
+    if (hashTable.find(hash1) != hashTable.end() && hashTable[hash1].find(hash2) != hashTable[hash1].end()) {
+        std::cout << "Neighbors found in the same hash bucket:\n";
+        for (const auto& neighbor : hashTable[hash1][hash2]) {
+            for (double val : neighbor) {
+                std::cout << val << " ";
+            }
+            std::cout << "\n";
+        }
+    } else {
+        std::cout << "No neighbors found in the same hash bucket.\n";
+    }
+
+    // Free GPU memory
     cudaFree(d_a1);
     cudaFree(d_a2);
+
     std::cout << "Hashing terminé !\n";
     return 0;
 }
+
