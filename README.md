@@ -106,7 +106,7 @@ This project explores how **GPU parallelism** (via CUDA) can:
 ```bash
 nvcc -o DLSH main.cu hashing.cu computeHashes.cu -std=c++17
 ./DLSH
-
+```
 
 ## 🧑‍💻 Authors
 
